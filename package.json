@@ -1,0 +1,17 @@
+{
+  "name": "lpdw_mongodb",
+  "version": "1.0.0",
+  "description": "LPDW - TP MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/tbh08/lpdw_mongodb.git"
+  },
+  "author": "Enguerran POULAIN <contact@epoulain.fr>",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/tbh08/lpdw_mongodb#readme",
+  "private": true
+}
