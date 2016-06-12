@@ -122,7 +122,16 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 > { "title" : "Speed of Sound" }
 > ```
 4. Affichez le titre et album des chansons de Stromae, ordonnés par année de la plus récente à la plus ancienne, et triés par ordre alphabétique par titre.
+> **Enguerran:**
+> ```javascript
+> > db.songs.find({artist: "Stromae"}, {title:1, album:1, _id:0}).sort({year: -1, title: 1})
+> { "title" : "Formidable", "album" : "Racine carrée" }
+> { "title" : "Papaoutai", "album" : "Racine carrée" }
+> { "title" : "Tous les memes", "album" : "Racine carrée" }
+> { "title" : "Alors on danse", "album" : "Cheese" }
+> ```
 5. Affichez les chansons du group Coldplay dans un tableau, où les éléments sont des strings ayant comme format TITRE (ALBUM). La sortie doit être comme ça :
+```
 [
 "Paradise(Paradise)",
 "The Scientist(The Scientist)",
@@ -130,7 +139,24 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 "Fix You(Fix You)",
 "Speed of Sound(Speed of Sound)"
 ]
+```
+> **Enguerran:**
+> ```javascript
+> > db.songs.find({artist: "Coldplay"}).map(function(song) { return song.title + "(" + song.album + ")" })
+> [
+> 	"Paradise(Mylo Xyloto)",
+> 	"The Scientist(A Rush of Blood to the Head)",
+> 	"Clocks(A Rush of Blood to the Head)",
+> 	"Fix You(X&Y)",
+> 	"Speed of Sound(X&Y)"
+> ]
+> ```
 6. Affichez, une seule fois, le noms des artistes ayant produit des chansons entre 2002 et 2005.
+> **Enguerran:**
+> ```javascript
+> > db.songs.distinct("artist", {$and: [{ year : { $gte: 2002 } }, { year: { $lte: 2005 } }]})
+> [ "Maroon 5", "Coldplay" ]
+> ```
 7. Créez une collection recordLabel, qui puisse stocker maximum 3 documents ou 1 KB et dont la structure doit être :
 nom: string
 url: string
