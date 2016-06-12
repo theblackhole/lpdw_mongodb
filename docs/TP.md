@@ -1,28 +1,126 @@
 #Réponses TP mongodb
 ###### Enguerran POULAIN
 
-#### PREMIÈRE PARTIE (Un peu de sysadmin...)
+##### Légende :
+* $ : commande exécutée avec droits utilisateur
+* \# : commande exécutée avec droits root
+* \> : commande exécutée dans le shell mongo
+* Aucun symbole devant : réponse/résultat
+* (...) : partie de résultat non incluse car longue et pas forcément utile
 
+#### PREMIÈRE PARTIE (Un peu de sysadmin...)
 
 1. Vérifiez qu'aucun processus mongo tourne actuellement sur votre machine. Si c’est le cas, arretez­le. Ensuite lancez une instance mongod avec le dbpath par défaut.
 Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du host depuis le shell.
+> **Enguerran:**
+> ```sh
+> # mongod
+> MongoDB shell version: 3.2.7
+> (...)
+>
+> > db.serverCmdLineOpts()
+>  {
+>  	"argv" : [
+>  		"mongod",
+>  		"--dbpath",
+>  		"/media/enguerran/LINUX/lpdw/mongodb/lpdw_mongodb/db"
+>  	],
+>  	"parsed" : {
+>  		"storage" : {
+>  			"dbPath" : "/media/enguerran/LINUX/lpdw/mongodb/lpdw_mongodb/db"
+>  		}
+>  	},
+>  	"ok" : 1
+>  }
+> ```
+> *Note :* mon ssd étant plein, je suis obligé de mettre un dbpath vers mon disque dur, d'où les infos indiquant que j'ai spécifié un dbpath.
 2. Arretez le processus depuis le shell.
+> **Enguerran :**
+> ```sh
+> > use admin
+>  switched to db admin
+>
+> > db.shutdownServer({timeoutSecs: 60});
+>  server should be down...
+> (...)
+> ```
 3. Lancez à nouveau une instance de mongod mais cette fois, modifiez le dbpath et le fichier de sortie de logs. Connectez vous sur le shell et affichez les infos utilisées pour la configuration du processus. Vérifiez aussi que les logs sont bien écrit dans le fichier avec un tail ­f ​ ou un ​cat . ​
+> **Enguerran :**
+> ```sh
+> # mongod --dbpath /path/to/db --logpath /path/to/log/dblog.log
+>
+> $ tail -f /path/to/log/dblog.log
+> 2016-06-12T16:29:20.612+0200 I CONTROL  [initandlisten]
+> 2016-06-12T16:29:20.612+0200 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
+> (...)
+> 2016-06-12T16:29:20.616+0200 I NETWORK  [initandlisten] waiting for connections on port 27017
+>
+> $ mongo
+> (...)
+>
+> > db.serverCmdLineOpts()
+>  {
+>  	"argv" : [
+>  		"mongod",
+>  		"--dbpath",
+>  		"/media/enguerran/LINUX/lpdw/mongodb/lpdw_mongodb/db",
+>  		"--logpath",
+>  		"/media/enguerran/LINUX/lpdw/mongodb/lpdw_mongodb/dblog.log"
+>  	],
+>  	"parsed" : {
+>  		"storage" : {
+>  			"dbPath" : "/media/enguerran/LINUX/lpdw/mongodb/lpdw_mongodb/db"
+>  		},
+>  		"systemLog" : {
+>  			"destination" : "file",
+>  			"path" : "/media/enguerran/LINUX/lpdw/mongodb/lpdw_mongodb/dblog.log"
+>  		}
+>  	},
+>  	"ok" : 1
+>  }
+> ```
 4. Faites l’import des données contenues dans le fichier zip donnée par l’enseignant afin de construire une base de données appelé “music”.
-> **Enguerran:** `sudo mongorestore /path/to/mymusic --db music`
+> **Enguerran:**
+> ```sh
+> # mongorestore /path/to/mymusic --db music
+>  2016-06-12T15:57:44.392+0200	building a list of collections to restore from /home/enguerran/Téléchargements/mymusic dir
+>  2016-06-12T15:57:44.393+0200	reading metadata for music.songs from /home/enguerran/Téléchargements/mymusic/songs.metadata.json
+>  2016-06-12T15:57:44.568+0200	restoring music.songs from /home/enguerran/Téléchargements/mymusic/songs.bson
+>  2016-06-12T15:57:44.572+0200	restoring indexes for collection music.songs from metadata
+>  2016-06-12T15:57:44.646+0200	finished restoring music.songs (19 documents)
+>  2016-06-12T15:57:44.646+0200	done
+> ```
 
 #### DEUXIÈME PARTIE (MongoDB Queries)
 
 1. Affichez les documents de la collection songs.
 > **Enguerran:**
-> ```
-> use music
-> show collections
-> db.songs.find()
+> ```javasript
+> > use music
+> switched to db music
+>
+> > show collections
+> songs
+>
+> > db.songs.find()
+> { "_id" : ObjectId("55328bd3f238ef5f0de2ad33"), "title" : "Papaoutai", "artist" : "Stromae", "album" : "Racine carrée", "year" : 2013 }
+> { "_id" : ObjectId("55328c04f238ef5f0de2ad34"), "title" : "Alors on danse", "artist" : "Stromae", "album" : "Cheese", "year" : 2010 }
+> (...)
+> { "_id" : ObjectId("553290a7f238ef5f0de2ad45"), "title" : "Elevation", "artist" : "U2", "album" : "All That You Can't Leave Behind", "year" : 2000 }
 > ```
 2. Comptez le nombre de documents existants dans la collection songs.
-> **Enguerran:** `db.songs.count()`
+> **Enguerran:**
+> ```javascript
+> > db.songs.count()
+> 19
+> ```
 3. Affichez exclusivement les titres des chansons du Coldplay de l’album X&Y.
+> **Enguerran:**
+> ```javascript
+> > db.songs.find({album: "X&Y", artist: "Coldplay"}, {title:1, _id:0})
+> { "title" : "Fix You" }
+> { "title" : "Speed of Sound" }
+> ```
 4. Affichez le titre et album des chansons de Stromae, ordonnés par année de la plus récente à la plus ancienne, et triés par ordre alphabétique par titre.
 5. Affichez les chansons du group Coldplay dans un tableau, où les éléments sont des strings ayant comme format TITRE (ALBUM). La sortie doit être comme ça :
 [
