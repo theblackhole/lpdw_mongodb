@@ -158,22 +158,108 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 > [ "Maroon 5", "Coldplay" ]
 > ```
 7. Créez une collection recordLabel, qui puisse stocker maximum 3 documents ou 1 KB et dont la structure doit être :
+```
 nom: string
 url: string
+```
 La validation doit être stricte. Cherchez les regex nécessaires pour les attributes.
+> **Enguerran:**
+> ```javascript
+> > db.createCollection("recordLabel", { capped: true, max: 3, size: 1000, validator: { $and: [ { name: { $type: "string", $exists: true } }, { url: { $type: "string", $exists: true, $regex: /((?:https?\:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i } } ] } });
+>  { "ok" : 1 }
+> ```
 8. Insérez les 3 registres dans la collection. Qu’est­ce qui se passe lorsque vous essayez insérer un 4ème ?
+> **Enguerran:**
+> ```javascript
+> > db.recordLabel.insert([{name: "RickRoll'D", url: "https://youtu.be/dQw4w9WgXcQ"},{name: "Nyan Cat", url: "https://youtu.be/QH2-TGUlwu4"},{name: "Gangnam Style", url: "https://youtu.be/9bZkp7q19f0"}]);
+> BulkWriteResult({
+> 	"writeErrors" : [ ],
+> 	"writeConcernErrors" : [ ],
+> 	"nInserted" : 3,
+> 	"nUpserted" : 0,
+> 	"nMatched" : 0,
+> 	"nModified" : 0,
+> 	"nRemoved" : 0,
+> 	"upserted" : [ ]
+> })
+>
+> > db.recordLabel.find({},{_id:0})
+>  { "name" : "RickRoll'D", "url" : "https://youtu.be/dQw4w9WgXcQ" }
+>  { "name" : "Nyan Cat", "url" : "https://youtu.be/QH2-TGUlwu4" }
+>  { "name" : "Gangnam Style", "url" : "https://youtu.be/9bZkp7q19f0" }
+>
+> > db.recordLabel.insert({name: "Stop! HammerTime", url: "https://youtu.be/GbKAaSf6e10"})
+> WriteResult({ "nInserted" : 1 })
+>
+> > db.recordLabel.find({},{_id:0})
+> { "name" : "Nyan Cat", "url" : "https://youtu.be/QH2-TGUlwu4" }
+> { "name" : "Gangnam Style", "url" : "https://youtu.be/9bZkp7q19f0" }
+> { "name" : "Stop! HammerTime", "url" : "https://youtu.be/GbKAaSf6e10" }
+> ```
+> Insérer un 4ème document supprime le premier inséré.
+
 9. Modifiez le validator sur la collection afin d’ajouter le pays en utilisant le code ​
-( ​
-ISO
-3166­1 alpha­2​
-)
+( ​[ISO 3166­1 alpha­2​](http://www.iso.org/iso/country_names_and_code_elements) )
+> **Enguerran:**
+> ```javascript
+> > db.runCommand( { "collMod": "recordLabel" , "validator": { $and: [ { name: { $type: "string", $exists: true } }, { url: { $type: "string", $exists: true, $regex: /((?:https?\:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i } }, { ISOCountry: { $type: "string", $exists: true, $regex: /(AF|AX|AL|DZ|AS|AD|AO|AI|AQ|AG|AR|AM|AW|AU|AT|AZ|BS|BH|BD|BB|BY|BE|BZ|BJ|BM|BT|BO|BA|BW|BV|BR|IO|BN|BG|BF|BI|KH|CM|CA|CV|KY|CF|TD|CL|CN|CX|CC|CO|KM|CG|CD|CK|CR|CI|HR|CU|CY|CZ|DK|DJ|DM|DO|EC|EG|SV|GQ|ER|EE|ET|FK|FO|FJ|FI|FR|GF|PF|TF|GA|GM|GE|DE|GH|GI|GR|GL|GD|GP|GU|GT|GG|GN|GW|GY|HT|HM|VA|HN|HK|HU|IS|IN|ID|IR|IQ|IE|IM|IL|IT|JM|JP|JE|JO|KZ|KE|KI|KR|KW|KG|LA|LV|LB|LS|LR|LY|LI|LT|LU|MO|MK|MG|MW|MY|MV|ML|MT|MH|MQ|MR|MU|YT|MX|FM|MD|MC|MN|ME|MS|MA|MZ|MM|NA|NR|NP|NL|AN|NC|NZ|NI|NE|NG|NU|NF|MP|NO|OM|PK|PW|PS|PA|PG|PY|PE|PH|PN|PL|PT|PR|QA|RE|RO|RU|RW|BL|SH|KN|LC|MF|PM|VC|WS|SM|ST|SA|SN|RS|SC|SL|SG|SK|SI|SB|SO|ZA|GS|ES|LK|SD|SR|SJ|SZ|SE|CH|SY|TW|TJ|TZ|TH|TL|TG|TK|TO|TT|TN|TR|TM|TC|TV|UG|UA|AE|GB|US|UM|UY|UZ|VU|VE|VN|VG|VI|WF|EH|YE|ZM|ZW)/ } } ] } } )
+> { "ok" : 1 }
+> ```
+
 10. Pour allez plus loin:
-a. Qu’est­ce que le TTL ?
+
+a. Qu’est-­ce que le TTL ?
+> **Enguerran:** TTL = **Time to Live**, délai avant qu'un document ne s'autodétruise (comme dans _Mission Impossible_ mais en moins impressionnant)
+
 b. Quelles sont les modifications à faire sur une collection pour rajouter du TTL ?
+> **Enguerran:**
+> ```javascript
+> > db.aCollection.createIndex( { "createdAt": 1 }, { expireAfterSeconds: 3600 } )
+> ```
+
 c. Si vous devez faire cette manipulation sur la collection recordLabel, il faudrait faire quoi exactement ?
+> **Enguerran:**
+Il n'est pas possible de faire directement la manipulation sur recordLabel car mongodb ne peut pas supprimer via le TTL (ou le `db.aCollection.remove()`) les collections "capped". Il faudrait donc enlever la limitation avant d'ajouter le TTL. Pour cela, le seul moyen est de copier temporairement la collection, ce qui supprimera la limitation, la renommer, puis ajouter le TTL
+
+> ```javascript
+> > db.recordLabel.copyTo("recordLabel_temp")
+> WARNING: db.eval is deprecated
+> 3
+>
+> > db.recordLabel.drop()
+> true
+>
+> > db.recordLabel_temp.renameCollection("recordLabel")
+> { "ok" : 1 }
+>
+> > db.recordLabel.createIndex( { "createdAt": 1 }, { expireAfterSeconds: 3600 } )
+> {
+> 	"createdCollectionAutomatically" : false,
+> 	"numIndexesBefore" : 1,
+> 	"numIndexesAfter" : 2,
+> 	"ok" : 1
+> }
+> ```
+
 d. Créez une nouvelle collection recordLabel2, avec le même validator, mais avec une TTL sur les documents de 10 secondes.
 
-TROISIÈME PARTIE (Driver MongoDB pour NodeJS)
+> **Enguerran:**
+> ```javascript
+> > db.createCollection("recordLabel2", { size: 1000, validator: { $and: [ { name: { $type: "string", $exists: true } }, { url: { $type: "string", $exists: true, $regex: /((?:https?\:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i } }, { ISOCountry: { $type: "string", $exists: true, $regex: /(AF|AX|AL|DZ|AS|AD|AO|AI|AQ|AG|AR|AM|AW|AU|AT|AZ|BS|BH|BD|BB|BY|BE|BZ|BJ|BM|BT|BO|BA|BW|BV|BR|IO|BN|BG|BF|BI|KH|CM|CA|CV|KY|CF|TD|CL|CN|CX|CC|CO|KM|CG|CD|CK|CR|CI|HR|CU|CY|CZ|DK|DJ|DM|DO|EC|EG|SV|GQ|ER|EE|ET|FK|FO|FJ|FI|FR|GF|PF|TF|GA|GM|GE|DE|GH|GI|GR|GL|GD|GP|GU|GT|GG|GN|GW|GY|HT|HM|VA|HN|HK|HU|IS|IN|ID|IR|IQ|IE|IM|IL|IT|JM|JP|JE|JO|KZ|KE|KI|KR|KW|KG|LA|LV|LB|LS|LR|LY|LI|LT|LU|MO|MK|MG|MW|MY|MV|ML|MT|MH|MQ|MR|MU|YT|MX|FM|MD|MC|MN|ME|MS|MA|MZ|MM|NA|NR|NP|NL|AN|NC|NZ|NI|NE|NG|NU|NF|MP|NO|OM|PK|PW|PS|PA|PG|PY|PE|PH|PN|PL|PT|PR|QA|RE|RO|RU|RW|BL|SH|KN|LC|MF|PM|VC|WS|SM|ST|SA|SN|RS|SC|SL|SG|SK|SI|SB|SO|ZA|GS|ES|LK|SD|SR|SJ|SZ|SE|CH|SY|TW|TJ|TZ|TH|TL|TG|TK|TO|TT|TN|TR|TM|TC|TV|UG|UA|AE|GB|US|UM|UY|UZ|VU|VE|VN|VG|VI|WF|EH|YE|ZM|ZW)/ } } ]}})
+> { "ok" : 1 }
+>
+> > db.recordLabel.createIndex( { "createdAt": 1 }, { expireAfterSeconds: 10 } )
+> {
+> 	"createdCollectionAutomatically" : false,
+> 	"numIndexesBefore" : 2,
+> 	"numIndexesAfter" : 2,
+> 	"note" : "all indexes already exist",
+> 	"ok" : 1
+> }
+> ```
+
+
+####TROISIÈME PARTIE (Driver MongoDB pour NodeJS)
 
 
 1. Créez un script NodeJS afin de créer et populer la collection users avec 1000 utilisateurs. Chaque document créé doit contenir un ​
