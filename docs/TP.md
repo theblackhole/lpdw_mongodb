@@ -13,7 +13,7 @@
 1. Vérifiez qu'aucun processus mongo tourne actuellement sur votre machine. Si c’est le cas, arretez­le. Ensuite lancez une instance mongod avec le dbpath par défaut.
 Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du host depuis le shell.
 > **Enguerran:**
-> ```sh
+> ```bash
 > # mongod
 > MongoDB shell version: 3.2.7
 > (...)
@@ -36,7 +36,7 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 > *Note :* mon ssd étant plein, je suis obligé de mettre un dbpath vers mon disque dur, d'où les infos indiquant que j'ai spécifié un dbpath.
 2. Arretez le processus depuis le shell.
 > **Enguerran :**
-> ```sh
+> ```bash
 > > use admin
 >  switched to db admin
 >
@@ -46,7 +46,7 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 > ```
 3. Lancez à nouveau une instance de mongod mais cette fois, modifiez le dbpath et le fichier de sortie de logs. Connectez vous sur le shell et affichez les infos utilisées pour la configuration du processus. Vérifiez aussi que les logs sont bien écrit dans le fichier avec un tail ­f ​ ou un ​cat . ​
 > **Enguerran :**
-> ```sh
+> ```bash
 > # mongod --dbpath /path/to/db --logpath /path/to/log/dblog.log
 >
 > $ tail -f /path/to/log/dblog.log
@@ -81,7 +81,7 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 > ```
 4. Faites l’import des données contenues dans le fichier zip donnée par l’enseignant afin de construire une base de données appelé “music”.
 > **Enguerran:**
-> ```sh
+> ```bash
 > # mongorestore /path/to/mymusic --db music
 >  2016-06-12T15:57:44.392+0200	building a list of collections to restore from /home/enguerran/Téléchargements/mymusic dir
 >  2016-06-12T15:57:44.393+0200	reading metadata for music.songs from /home/enguerran/Téléchargements/mymusic/songs.metadata.json
@@ -429,9 +429,29 @@ Collection Design ? Donnez des exemples d’utilisation de chaque possible schem
 
 
 1. Exportez la collections des chansons.
+> **Enguerran:**
+> ```bash
+> $ mongodump --db music --collection songs
+> ```
+
 2. Exportez la collection des utilisateurs de la base des données n’ayant aucune
 chanson dans la liste des favorites.
-3. Créez une nouvelle base de données appelé ‘no­favorites’ contenant les utilisateurs
-exportés.
-4. Recherche: Quelles autres commandes permettent sur mongodb de faire export et
-import ? Quelles sont les différences avec mongodump et mongorestore ?
+> **Enguerran:**
+> ```bash
+> $ mongodump --db music --collection users --query '{"favoriteSongs": {total: 0}}' --gzip --archive=users_no_fav.gzip
+> ```
+3. Créez une nouvelle base de données appelé ‘no­favorites’ contenant les utilisateurs exportés.
+> **Enguerran:**
+> ```bash
+> $ mongorestore --db nofavorites --gzip --archive=users_no_fav.gzip
+> ```
+
+4. Recherche: Quelles autres commandes permettent sur mongodb de faire export et import ? Quelles sont les différences avec mongodump et mongorestore ?
+> **Enguerran:**
+> * `mongoexport` : exporte les données en JSON ou CSV dans un format lisible ("human-readable")
+> * `mongoimport` : importe les données en JSON, CSV, TSV créés dans un format lisible ("human-readable"), soit via un outil d'export, soit à la main !
+>
+> Grande différence avec `mongodump` est qu'il s'agit d'un json classique. Ces 2 outils ne supportent pas le BSON et ses possibilités.
+
+
+
