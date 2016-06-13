@@ -262,17 +262,16 @@ d. Créez une nouvelle collection recordLabel2, avec le même validator, mais av
 ####TROISIÈME PARTIE (Driver MongoDB pour NodeJS)
 
 
-1. Créez un script NodeJS afin de créer et populer la collection users avec 1000 utilisateurs. Chaque document créé doit contenir un ​
-username (à utiliser comme _id),
-un ​
-displayName et un ​
-email ​
-. Utilisez faker pour générer les données. Assurez vous que à chaque fois que le script soit exécuté, il n’y aura que 1000 documents dans la
+1. Créez un script NodeJS afin de créer et populer la collection users avec 1000 utilisateurs. Chaque document créé doit contenir un _​username_ (à utiliser comme _id), un _displayName_ et un _​email_. Utilisez faker pour générer les données. Assurez vous que à chaque fois que le script soit exécuté, il n’y aura que 1000 documents dans la
 collection.
+> **Enguerran:**
+>  [part3-1.js](scripts/part3-1.js) (`npm run 3-1`)
 2. Créez un script NodeJS afin de créer et populer un attribut favoriteSongs pour
 chaque user, contenant un tableau des objets avec deux attributs : title et artist. Par
 exemple :
+```javascript
 [ { title: ‘Clocks’, artist: ‘Coldplay’ }, { title: ‘Formidable’, artist: ‘Stromae’ }, ... ]
+````
 Afin de choisir combien de chansons favorites aura chaque user, il faudrait tirer un
 nombre au hasard entre 0 et 10. Puis en fonction du nombre des favorites, vous
 devez piocher dans la liste existante des chansons pour construire le tableau.
@@ -280,6 +279,7 @@ Assurez vous que le tableau ne contient pas des chansons répétées.
 3. Créez un script NodeJS afin de créer et populer une collection notes, contenant des
 documents correspondant à des évaluations des chansons par les users. Un
 exemple d’un document de cette collection est :
+```javascript
 {
   username: ‘Garrett_Homenick46’,
   song: {
@@ -288,6 +288,7 @@ exemple d’un document de cette collection est :
   },
   note: 4
 }
+```
 Afin de constituer vos données, vous devez parcourir toutes les users et pour chaque
 utilisateur choisir le nombre des chansons à évaluer (min 0, max 5). En fonction du
 nombre de chansons à évaluer, vous devez piocher dans la liste existante des
@@ -299,15 +300,132 @@ b. d’afficher les users ayant dans la liste de ses favorites au moins une chan
 de Coldplay
 5. Pour aller plus loin: créez un script pour afficher les 10 chansons les plus évaluées
 
-QUATRIÈME PARTIE (Schema Design)
 
+####QUATRIÈME PARTIE (Schema Design)
 
 
 1. Considérez les conceptes de CV et Personne. Comment peut on représenter ces
 deux concepts avec un Embbeded Design ? Comment le faire avec le Separated
 Collection Design ? Donnez des exemples d’utilisation de chaque possible schema.
 
-PARTIE FINALE (Export/Import des données)
+> **Enguerran:**
+> * Pour un **Embbeded Design** il faudrait regarder la priorité des objets.
+> On pourrait supposer qu'ici, un système de recrutement irait d'abord chercher les mots-clés/compétences pour voir si ça correspond au besoin de l'entreprise, un peu comme fait [ChooseYourBoss](https://www.chooseyourboss.com/) puis si les mots clés matchent, on aura besoin d'avoir accès à ses infos de contact:
+> ```javascript
+> "CV": {
+>     "title": "Senior Back-end Developer",
+>     "skills": [
+>         "Oracle Database",
+>         "Node",
+>         "PHP",
+>         "Python",
+>         "MongoDB",
+>         "Ruby",
+>         "C#",
+>         "Unity3D"
+>     ],
+>     "degrees": [
+>         {"year":2012, "degree":"Ultimate Certified DB Engineer"},
+>         {"year":2010, "degree":"Best Dad of The Year 2010 Gold Certificate"}
+>     ]
+>     "history": [
+>         {"company":"9gag", "period":"2005-2016", "missions": "Cat gifs maker"},
+>         {"company":"Google", "period":"2005-2012", "missions": "Prevent the end of the world"},
+>         {"company":"Sun Microsystems", "period":"2000-2005", "missions": "Mostly, Lorem Ipsum and dolor sit amet"}
+>     ],
+>     "Person" : {
+>         "lastName": "DOE",
+>         "firstName": "John",
+>         "birthday": "1982-02-14",
+>         "address": "2 rue pas loin de la Tour Eiffel",
+>         "zipCode": "75007",
+>         "city": "Paris",
+>         "country": "France",
+>         "state": null,
+>         "email": "contact@john-d.com"
+>     }
+> }
+> ```
+>
+> * Ou alors, toujours pour l'**Embedded Design**, l'entreprise possède un annuaire de ses employés que l'on peut consulter (donc la Personne est prioritaire vu qu'on cherche d'abord le nom par exemple avant de cliquer sur un lien ouvrant le cv)
+>
+> ```javascript
+> "Person": {
+>     "lastName": "DOE",
+>     "firstName": "John",
+>     "birthday": "1982-02-14",
+>     "address": "2 rue pas loin de la Tour Eiffel",
+>     "zipCode": "75007",
+>     "city": "Paris",
+>     "country": "France",
+>     "state": null,
+>     "email": "contact@john-d.com",
+>     "CV": {
+>         "title": "Senior Back-end Developer",
+>         "skills": [
+>             "Oracle Database",
+>             "Node",
+>             "PHP",
+>             "Python",
+>             "MongoDB",
+>             "Ruby",
+>             "C#",
+>             "Unity3D"
+>         ],
+>         "degrees": [
+>             {"year":2012, "degree":"Ultimate Certified DB Engineer"},
+>             {"year":2010, "degree":"Best Dad of The Year 2010 Gold Certificate"}
+>         ]
+>         "history": [
+>             {"company":"9gag", "period":"2005-2016", "missions": "Cat gifs maker"},
+>             {"company":"Google", "period":"2005-2012", "missions": "Prevent the end of the world"},
+>             {"company":"Sun Microsystems", "period":"2000-2005", "missions": "Mostly, Lorem Ipsum and dolor sit amet"}
+>         ]
+>     }
+> }
+> ```
+> * Pour un **Separated Design** il suffit juste de séparer les deux entitées :
+> ```javascript
+> "CV": {
+>     "title": "Senior Back-end Developer",
+>     "skills": [
+>         "Oracle Database",
+>         "Node",
+>         "PHP",
+>         "Python",
+>         "MongoDB",
+>         "Ruby",
+>         "C#",
+>         "Unity3D"
+>     ],
+>     "degrees": [
+>         {"year":2012, "degree":"Ultimate Certified DB Engineer"},
+>         {"year":2010, "degree":"Best Dad of The Year 2010 Gold Certificate"}
+>     ]
+>     "history": [
+>         {"company":"9gag", "period":"2005-2016", "missions": "Cat gifs maker"},
+>         {"company":"Google", "period":"2005-2012", "missions": "Prevent the end of the world"},
+>         {"company":"Sun Microsystems", "period":"2000-2005", "missions": "Mostly, Lorem Ipsum and dolor sit amet"}
+>     ]
+> }
+> ```
+> ```javascript
+> "Person" : {
+>     "lastName": "DOE",
+>     "firstName": "John",
+>     "birthday": "1982-02-14",
+>     "address": "2 rue pas loin de la Tour Eiffel",
+>     "zipCode": "75007",
+>     "city": "Paris",
+>     "country": "France",
+>     "state": null,
+>     "email": "contact@john-d.com"
+> }
+> ```
+> On pourrait même aller plus loin en séparant les villes et les pays par exemple...
+
+
+#### PARTIE FINALE (Export/Import des données)
 
 
 1. Exportez la collections des chansons.
