@@ -1,4 +1,8 @@
 # Created by .ignore support plugin (hsz.mobi)
+### Custom template
+/db/journal/
+!/db/journal/.gitkeep
+
 ### Node template
 # Logs
 logs
