@@ -12,6 +12,7 @@
 
 1. Vérifiez qu'aucun processus mongo tourne actuellement sur votre machine. Si c’est le cas, arretez­le. Ensuite lancez une instance mongod avec le dbpath par défaut.
 Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du host depuis le shell.
+
 > **Enguerran:**
 > ```bash
 > # mongod
@@ -34,7 +35,9 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 >  }
 > ```
 > *Note :* mon ssd étant plein, je suis obligé de mettre un dbpath vers mon disque dur, d'où les infos indiquant que j'ai spécifié un dbpath.
+
 2. Arretez le processus depuis le shell.
+
 > **Enguerran :**
 > ```bash
 > > use admin
@@ -44,7 +47,9 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 >  server should be down...
 > (...)
 > ```
+
 3. Lancez à nouveau une instance de mongod mais cette fois, modifiez le dbpath et le fichier de sortie de logs. Connectez vous sur le shell et affichez les infos utilisées pour la configuration du processus. Vérifiez aussi que les logs sont bien écrit dans le fichier avec un tail ­f ​ ou un ​cat . ​
+
 > **Enguerran :**
 > ```bash
 > # mongod --dbpath /path/to/db --logpath /path/to/log/dblog.log
@@ -79,7 +84,9 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 >  	"ok" : 1
 >  }
 > ```
+
 4. Faites l’import des données contenues dans le fichier zip donnée par l’enseignant afin de construire une base de données appelé “music”.
+
 > **Enguerran:**
 > ```bash
 > # mongorestore /path/to/mymusic --db music
@@ -94,6 +101,7 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 #### DEUXIÈME PARTIE (MongoDB Queries)
 
 1. Affichez les documents de la collection songs.
+
 > **Enguerran:**
 > ```javasript
 > > use music
@@ -108,20 +116,26 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 > (...)
 > { "_id" : ObjectId("553290a7f238ef5f0de2ad45"), "title" : "Elevation", "artist" : "U2", "album" : "All That You Can't Leave Behind", "year" : 2000 }
 > ```
+
 2. Comptez le nombre de documents existants dans la collection songs.
+
 > **Enguerran:**
 > ```javascript
 > > db.songs.count()
 > 19
 > ```
+
 3. Affichez exclusivement les titres des chansons du Coldplay de l’album X&Y.
+
 > **Enguerran:**
 > ```javascript
 > > db.songs.find({album: "X&Y", artist: "Coldplay"}, {title:1, _id:0})
 > { "title" : "Fix You" }
 > { "title" : "Speed of Sound" }
 > ```
+
 4. Affichez le titre et album des chansons de Stromae, ordonnés par année de la plus récente à la plus ancienne, et triés par ordre alphabétique par titre.
+
 > **Enguerran:**
 > ```javascript
 > > db.songs.find({artist: "Stromae"}, {title:1, album:1, _id:0}).sort({year: -1, title: 1})
@@ -130,7 +144,9 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 > { "title" : "Tous les memes", "album" : "Racine carrée" }
 > { "title" : "Alors on danse", "album" : "Cheese" }
 > ```
+
 5. Affichez les chansons du group Coldplay dans un tableau, où les éléments sont des strings ayant comme format TITRE (ALBUM). La sortie doit être comme ça :
+
 ```
 [
 "Paradise(Paradise)",
@@ -140,6 +156,7 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 "Speed of Sound(Speed of Sound)"
 ]
 ```
+
 > **Enguerran:**
 > ```javascript
 > > db.songs.find({artist: "Coldplay"}).map(function(song) { return song.title + "(" + song.album + ")" })
@@ -151,24 +168,32 @@ Connectez­vous sur le shell mongo et affichez le port utilisé et less infos du
 > 	"Speed of Sound(X&Y)"
 > ]
 > ```
+
 6. Affichez, une seule fois, le noms des artistes ayant produit des chansons entre 2002 et 2005.
+
 > **Enguerran:**
 > ```javascript
 > > db.songs.distinct("artist", {$and: [{ year : { $gte: 2002 } }, { year: { $lte: 2005 } }]})
 > [ "Maroon 5", "Coldplay" ]
 > ```
+
 7. Créez une collection recordLabel, qui puisse stocker maximum 3 documents ou 1 KB et dont la structure doit être :
+
 ```
 nom: string
 url: string
 ```
+
 La validation doit être stricte. Cherchez les regex nécessaires pour les attributes.
+
 > **Enguerran:**
 > ```javascript
 > > db.createCollection("recordLabel", { capped: true, max: 3, size: 1000, validator: { $and: [ { name: { $type: "string", $exists: true } }, { url: { $type: "string", $exists: true, $regex: /((?:https?\:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i } } ] } });
 >  { "ok" : 1 }
 > ```
+
 8. Insérez les 3 registres dans la collection. Qu’est­ce qui se passe lorsque vous essayez insérer un 4ème ?
+
 > **Enguerran:**
 > ```javascript
 > > db.recordLabel.insert([{name: "RickRoll'D", url: "https://youtu.be/dQw4w9WgXcQ"},{name: "Nyan Cat", url: "https://youtu.be/QH2-TGUlwu4"},{name: "Gangnam Style", url: "https://youtu.be/9bZkp7q19f0"}]);
@@ -200,6 +225,7 @@ La validation doit être stricte. Cherchez les regex nécessaires pour les attri
 
 9. Modifiez le validator sur la collection afin d’ajouter le pays en utilisant le code ​
 ( ​[ISO 3166­1 alpha­2​](http://www.iso.org/iso/country_names_and_code_elements) )
+
 > **Enguerran:**
 > ```javascript
 > > db.runCommand( { "collMod": "recordLabel" , "validator": { $and: [ { name: { $type: "string", $exists: true } }, { url: { $type: "string", $exists: true, $regex: /((?:https?\:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i } }, { ISOCountry: { $type: "string", $exists: true, $regex: /(AF|AX|AL|DZ|AS|AD|AO|AI|AQ|AG|AR|AM|AW|AU|AT|AZ|BS|BH|BD|BB|BY|BE|BZ|BJ|BM|BT|BO|BA|BW|BV|BR|IO|BN|BG|BF|BI|KH|CM|CA|CV|KY|CF|TD|CL|CN|CX|CC|CO|KM|CG|CD|CK|CR|CI|HR|CU|CY|CZ|DK|DJ|DM|DO|EC|EG|SV|GQ|ER|EE|ET|FK|FO|FJ|FI|FR|GF|PF|TF|GA|GM|GE|DE|GH|GI|GR|GL|GD|GP|GU|GT|GG|GN|GW|GY|HT|HM|VA|HN|HK|HU|IS|IN|ID|IR|IQ|IE|IM|IL|IT|JM|JP|JE|JO|KZ|KE|KI|KR|KW|KG|LA|LV|LB|LS|LR|LY|LI|LT|LU|MO|MK|MG|MW|MY|MV|ML|MT|MH|MQ|MR|MU|YT|MX|FM|MD|MC|MN|ME|MS|MA|MZ|MM|NA|NR|NP|NL|AN|NC|NZ|NI|NE|NG|NU|NF|MP|NO|OM|PK|PW|PS|PA|PG|PY|PE|PH|PN|PL|PT|PR|QA|RE|RO|RU|RW|BL|SH|KN|LC|MF|PM|VC|WS|SM|ST|SA|SN|RS|SC|SL|SG|SK|SI|SB|SO|ZA|GS|ES|LK|SD|SR|SJ|SZ|SE|CH|SY|TW|TJ|TZ|TH|TL|TG|TK|TO|TT|TN|TR|TM|TC|TV|UG|UA|AE|GB|US|UM|UY|UZ|VU|VE|VN|VG|VI|WF|EH|YE|ZM|ZW)/ } } ] } } )
@@ -209,15 +235,18 @@ La validation doit être stricte. Cherchez les regex nécessaires pour les attri
 10. Pour allez plus loin:
 
 a. Qu’est-­ce que le TTL ?
+
 > **Enguerran:** TTL = **Time to Live**, délai avant qu'un document ne s'autodétruise (comme dans _Mission Impossible_ mais en moins impressionnant)
 
 b. Quelles sont les modifications à faire sur une collection pour rajouter du TTL ?
+
 > **Enguerran:**
 > ```javascript
 > > db.aCollection.createIndex( { "createdAt": 1 }, { expireAfterSeconds: 3600 } )
 > ```
 
 c. Si vous devez faire cette manipulation sur la collection recordLabel, il faudrait faire quoi exactement ?
+
 > **Enguerran:**
 Il n'est pas possible de faire directement la manipulation sur recordLabel car mongodb ne peut pas supprimer via le TTL (ou le `db.aCollection.remove()`) les collections "capped". Il faudrait donc enlever la limitation avant d'ajouter le TTL. Pour cela, le seul moyen est de copier temporairement la collection, ce qui supprimera la limitation, la renommer, puis ajouter le TTL
 
@@ -269,9 +298,11 @@ collection.
 2. Créez un script NodeJS afin de créer et populer un attribut favoriteSongs pour
 chaque user, contenant un tableau des objets avec deux attributs : title et artist. Par
 exemple :
+
 ```javascript
 [ { title: ‘Clocks’, artist: ‘Coldplay’ }, { title: ‘Formidable’, artist: ‘Stromae’ }, ... ]
-````
+```
+
 Afin de choisir combien de chansons favorites aura chaque user, il faudrait tirer un
 nombre au hasard entre 0 et 10. Puis en fonction du nombre des favorites, vous
 devez piocher dans la liste existante des chansons pour construire le tableau.
@@ -279,6 +310,7 @@ Assurez vous que le tableau ne contient pas des chansons répétées.
 3. Créez un script NodeJS afin de créer et populer une collection notes, contenant des
 documents correspondant à des évaluations des chansons par les users. Un
 exemple d’un document de cette collection est :
+
 ```javascript
 {
   username: ‘Garrett_Homenick46’,
@@ -289,6 +321,7 @@ exemple d’un document de cette collection est :
   note: 4
 }
 ```
+
 Afin de constituer vos données, vous devez parcourir toutes les users et pour chaque
 utilisateur choisir le nombre des chansons à évaluer (min 0, max 5). En fonction du
 nombre de chansons à évaluer, vous devez piocher dans la liste existante des
@@ -429,6 +462,7 @@ Collection Design ? Donnez des exemples d’utilisation de chaque possible schem
 
 
 1. Exportez la collections des chansons.
+
 > **Enguerran:**
 > ```bash
 > $ mongodump --db music --collection songs
@@ -436,17 +470,21 @@ Collection Design ? Donnez des exemples d’utilisation de chaque possible schem
 
 2. Exportez la collection des utilisateurs de la base des données n’ayant aucune
 chanson dans la liste des favorites.
+
 > **Enguerran:**
 > ```bash
 > $ mongodump --db music --collection users --query '{"favoriteSongs": {total: 0}}' --gzip --archive=users_no_fav.gzip
 > ```
+
 3. Créez une nouvelle base de données appelé ‘no­favorites’ contenant les utilisateurs exportés.
+
 > **Enguerran:**
 > ```bash
 > $ mongorestore --db nofavorites --gzip --archive=users_no_fav.gzip
 > ```
 
 4. Recherche: Quelles autres commandes permettent sur mongodb de faire export et import ? Quelles sont les différences avec mongodump et mongorestore ?
+
 > **Enguerran:**
 > * `mongoexport` : exporte les données en JSON ou CSV dans un format lisible ("human-readable")
 > * `mongoimport` : importe les données en JSON, CSV, TSV créés dans un format lisible ("human-readable"), soit via un outil d'export, soit à la main !
